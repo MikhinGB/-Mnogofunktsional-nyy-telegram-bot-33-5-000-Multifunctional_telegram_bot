@@ -45,7 +45,7 @@ pixels_to_ascii(image):
 
 - @bot.message_handler(content_types=['text']) Обработчик сообщений, реагирует на текст, вводимый и отправленный пользователем.
    - def save_ascii_chars(message) принимает и сохраняет в переменноц ASCII_CHARS уникальный набор символов ASCII, введенный пользователем
-![Ввод уникального набора символов ASCII](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE1.png)
+![Ввод уникального набора символов ASCII](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE2.png)
 
 ![Результат преобразования](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE2.png)   
 

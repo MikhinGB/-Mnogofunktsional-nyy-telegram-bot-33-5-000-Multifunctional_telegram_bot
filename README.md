@@ -33,7 +33,7 @@ pixels_to_ascii(image):
 ### Преобразование изображения в "негатив".
 
 - invert_colors(image): Преобразует изображение в инверсионное (эффект негатива)
-- def invert_and_send(message):Преобразует изображение в 'негатив' и  отправляет его обратно пользователю.
+
 
 ## Взаимодействие с пользователем  
 
@@ -45,7 +45,7 @@ pixels_to_ascii(image):
 
 - @bot.message_handler(content_types=['text']) Обработчик сообщений, реагирует на текст, вводимый и отправленный пользователем.
    - def save_ascii_chars(message) принимает и сохраняет в переменноц ASCII_CHARS уникальный набор символов ASCII, введенный пользователем.
-
+![Ввод уникального набора символов](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE1.png)
 
 ![Результат преобразования](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE3.png)   
 
@@ -65,3 +65,5 @@ pixels_to_ascii(image):
 - pixelate_and_send(message): Пикселизирует изображение и отправляет его обратно пользователю.
 
 - ascii_and_send(message): Преобразует изображение в ASCII-арт и отправляет результат в виде текстового сообщения.
+  
+- def invert_and_send(message): Преобразует изображение в 'негатив' и  отправляет его обратно пользователю.

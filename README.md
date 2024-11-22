@@ -44,15 +44,15 @@ pixels_to_ascii(image):
 - @bot.message_handler(content_types=['photo']): Обработчик сообщений, реагирует на изображения, отправляемые пользователем. 
 
 - @bot.message_handler(content_types=['text']) Обработчик сообщений, реагирует на текст, вводимый и отправленный пользователем.
-   - def save_ascii_chars(message) принимает и сохраняет в переменноц ASCII_CHARS уникальный набор символов ASCII, введенный пользователем
-![Ввод уникального набора символов ASCII](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE2.png)
+   - def save_ascii_chars(message) принимает и сохраняет в переменноц ASCII_CHARS уникальный набор символов ASCII, введенный пользователем.
+
 
 ![Результат преобразования](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE3.png)   
 
 ### Клавиатура для взаимодействия:
 
 - get_options_keyboard(): Создает клавиатуру с кнопками для выбора пользователем, как обработать изображение: через пикселизацию, преобразовать в ASCII-арт или создать НЕГАТИВ.
-![Клавиатура]()
+![Клавиатура](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE1.jpg)
 
 ### Обработка колбэков:
 

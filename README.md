@@ -34,7 +34,7 @@ pixels_to_ascii(image):
 
 - invert_colors(image): Преобразует изображение в инверсионное (эффект негатива)
 
-![Преобразование изображения в 'негатив']()
+![Преобразование изображения в 'негатив'](https://github.com/MikhinGB/Multifunctional_telegram_bot/blob/main/%D0%A4%D0%BE%D1%82%D0%BE4.jpg)
 
 
 ## Взаимодействие с пользователем  

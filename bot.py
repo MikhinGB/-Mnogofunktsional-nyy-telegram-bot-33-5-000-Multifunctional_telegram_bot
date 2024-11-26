@@ -4,17 +4,16 @@ import io
 from telebot import types
 import os
 
-
 TOKEN = os.environ['TOKEN']
 bot = telebot.TeleBot(TOKEN)
 
 user_states = {}  # тут будем хранить информацию о действиях пользователя
 
 ASCII_CHARS = ''
+type_mirror = 1
 
 
 def resize_image(image, new_width=100):
-
     """ Изменяет размер изображения с сохранением пропорций."""
 
     width, height = image.size
@@ -22,23 +21,30 @@ def resize_image(image, new_width=100):
     new_height = int(new_width * ratio)
     return image.resize((new_width, new_height))
 
-def invert_colors(image):
 
+def invert_colors(image):
     """ Преобразует изображение в инверсионное (эффект негатива) """
 
     im_invert = ImageOps.invert(image)
     return im_invert
 
 
-def grayify(image):
+def mirror_image(image):
+    """ Преобразует изображение в зеркальное """
+    if type_mirror == 1:
+        im_flipped = image.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
+    else:
+        im_flipped = image.transpose(method=Image.Transpose.FLIP_TOP_BOTTOM)
+    return im_flipped
 
+
+def grayify(image):
     """ Преобразует цветное изображение в оттенки серого. """
 
     return image.convert("L")
 
 
 def image_to_ascii(image_stream, new_width=40):
-
     """ Основная функция для преобразования изображения в ASCII-арт. Изменяет размер, преобразует в градации серого
     и затем в строку ASCII-символов."""
 
@@ -66,7 +72,6 @@ def image_to_ascii(image_stream, new_width=40):
 
 
 def pixels_to_ascii(image):
-
     """ Конвертирует пиксели изображения в градациях серого в строку ASCII-символов, используя предопределенную строку
     ASCII_CHARS"""
 
@@ -79,7 +84,6 @@ def pixels_to_ascii(image):
 
 # Огрубляем изображение
 def pixelate_image(image, pixel_size):
-
     """ Принимает изображение и размер пикселя. Уменьшает изображение до размера, где один пиксель представляет большую
      область, затем увеличивает обратно, создавая пиксельный эффект."""
 
@@ -96,49 +100,53 @@ def pixelate_image(image, pixel_size):
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-
     """ Обработчик сообщений, реагирует на команды /start и /help, отправляя приветственное сообщение. """
 
     bot.reply_to(message, "Send me an image, and I'll provide options for you!")
 
+
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
-
     """ Обработчик сообщений, реагирует на изображения, отправляемые пользователем. Предлагает
     пользователю ввести уникальный набор символов ASCII и выбрать варианты обработки."""
 
     bot.reply_to(message, "I got your photo! Please choose what you'd like to do with it.",
                  reply_markup=get_options_keyboard())
     user_states[message.chat.id] = {'photo': message.photo[-1].file_id}
-    bot.reply_to(message, "Введите набор символов ASCII без пробелов, без запятых....")
-    bot.register_next_step_handler(message, save_ascii_chars)
+    # bot.reply_to(message, "Введите набор символов ASCII без пробелов, без запятых....")
+    # bot.register_next_step_handler(message, save_ascii_chars)
+
 
 @bot.message_handler(content_types=['text'])
 def save_ascii_chars(message):
-
     """ Обработчик сообщений, принимает уникальный набор символов ASCII, введенный пользователем."""
-
     global ASCII_CHARS
     ASCII_CHARS = message.text
     bot.reply_to(message, f'Ваши данные успешно сохранены!')
 
 
 def get_options_keyboard():
-
     """ Создает клавиатуру с кнопками для выбора пользователем, как обработать изображение: через пикселизацию или
-    преобразование в ASCII-арт. """
-
+    преобразование в ASCII-арт, сделать негативное изображение или зеркальное отображение """
     keyboard = types.InlineKeyboardMarkup()
     pixelate_btn = types.InlineKeyboardButton("Pixelate", callback_data="pixelate")
     ascii_btn = types.InlineKeyboardButton("ASCII Art", callback_data="ascii")
     negative_btn = types.InlineKeyboardButton("Negative", callback_data="negative")
-    keyboard.add(pixelate_btn, ascii_btn, negative_btn)
+    mirror_btn = types.InlineKeyboardButton("Mirror", callback_data="mirror")
+    keyboard.add(pixelate_btn, ascii_btn, negative_btn, mirror_btn)
+    return keyboard
+
+def get_mirror_keyboard():
+    """ Создает клавиатуру с кнопками для выбора горизонтально или вертикально отзеркалить"""
+    keyboard = types.InlineKeyboardMarkup()
+    horyzont_btn = types.InlineKeyboardButton("Горизонтально", callback_data="horizontal")
+    vert_btn = types.InlineKeyboardButton("Вертикально", callback_data="vertical")
+    keyboard.add(horyzont_btn, vert_btn)
     return keyboard
 
 
 @bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
-
+def callback_query(call: types.CallbackQuery):
     """ Определяет действия в ответ на выбор пользователя (например, пикселизация или ASCII-арт) и вызывает
     соответствующую функцию обработки.
 """
@@ -149,14 +157,31 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Converting your image to ASCII art...")
         ascii_and_send(call.message)
     elif call.data == "negative":
-        bot.answer_callback_query(call.id, "Creating a negative image...")
+        bot.answer_callback_query(call.id, "Creating a negative your image...")
         invert_and_send(call.message)
-
+    elif call.data == "mirror":
+        bot.answer_callback_query(call.id, "Выберите горизонтально или вертикально отзеркалить...")
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(chat_id=call.message.chat.id, text="Отразить горизонтально или вертикально:",
+                         reply_markup=get_mirror_keyboard())
+    elif call.data == "horizontal":
+        bot.answer_callback_query(call.id, "Выберите горизонтально или вертикально отзеркалить...")
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(chat_id=call.message.chat.id, text="Отразить горизонтально или вертикально:",
+                         reply_markup=get_mirror_keyboard())
+        global type_mirror
+        type_mirror = 1
+        mirror_and_send(call.message)
+    elif call.data == "vertical":
+        bot.answer_callback_query(call.id, "Выберите горизонтально или вертикально отзеркалить...")
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(chat_id=call.message.chat.id, text="Отразить горизонтально или вертикально:",
+                         reply_markup=get_mirror_keyboard())
+        type_mirror = 0
+        mirror_and_send(call.message)
 
 def pixelate_and_send(message):
-
     """ Пикселизирует изображение и отправляет его обратно пользователю."""
-
     photo_id = user_states[message.chat.id]['photo']
     file_info = bot.get_file(photo_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -172,7 +197,6 @@ def pixelate_and_send(message):
 
 
 def ascii_and_send(message):
-
     """ Преобразует изображение в ASCII-арт и отправляет результат в виде текстового сообщения."""
     photo_id = user_states[message.chat.id]['photo']
     file_info = bot.get_file(photo_id)
@@ -184,7 +208,6 @@ def ascii_and_send(message):
 
 
 def invert_and_send(message):
-
     """ Преобразует изображение в 'негатив' и  отправляет его обратно пользователю. """
     photo_id = user_states[message.chat.id]['photo']
     file_info = bot.get_file(photo_id)
@@ -196,6 +219,22 @@ def invert_and_send(message):
 
     output_stream = io.BytesIO()
     inverted.save(output_stream, format="JPEG")
+    output_stream.seek(0)
+    bot.send_photo(message.chat.id, output_stream)
+
+
+def mirror_and_send(message):
+    """ Преобразует изображение в зеркальное и отправляет его обратно пользователю. """
+    photo_id = user_states[message.chat.id]['photo']
+    file_info = bot.get_file(photo_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    image_stream = io.BytesIO(downloaded_file)
+    image = Image.open(image_stream)
+    reflected_mirror = mirror_image(image)
+
+    output_stream = io.BytesIO()
+    reflected_mirror.save(output_stream, format="JPEG")
     output_stream.seek(0)
     bot.send_photo(message.chat.id, output_stream)
 

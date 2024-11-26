@@ -238,5 +238,8 @@ def mirror_and_send(message):
     output_stream.seek(0)
     bot.send_photo(message.chat.id, output_stream)
 
+    global type_mirror
+    type_mirror = 1
+
 
 bot.polling(none_stop=True)

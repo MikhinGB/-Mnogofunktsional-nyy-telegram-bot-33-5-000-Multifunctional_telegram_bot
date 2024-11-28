@@ -37,6 +37,14 @@ def mirror_image(image):
         im_flipped = image.transpose(method=Image.Transpose.FLIP_TOP_BOTTOM)
     return im_flipped
 
+def convert_to_heatmap(image):
+    """ Преобразует изображение так, чтобы его цвета отображались в виде тепловой карты,
+    от синего (холодные области) до красного (теплые области) """
+
+    image = grayify(image)
+    image = ImageOps.colorize(image, black='blue', white='red', mid='green')
+
+    return image
 
 def grayify(image):
     """ Преобразует цветное изображение в оттенки серого. """
@@ -133,7 +141,8 @@ def get_options_keyboard():
     ascii_btn = types.InlineKeyboardButton("ASCII Art", callback_data="ascii")
     negative_btn = types.InlineKeyboardButton("Negative", callback_data="negative")
     mirror_btn = types.InlineKeyboardButton("Mirror", callback_data="mirror")
-    keyboard.add(pixelate_btn, ascii_btn, negative_btn, mirror_btn)
+    heatmap_btn = types.InlineKeyboardButton("Heatmap", callback_data="heatmap")
+    keyboard.add(pixelate_btn, ascii_btn, negative_btn, mirror_btn, heatmap_btn)
     return keyboard
 
 def get_mirror_keyboard():
@@ -159,6 +168,9 @@ def callback_query(call: types.CallbackQuery):
     elif call.data == "negative":
         bot.answer_callback_query(call.id, "Creating a negative your image...")
         invert_and_send(call.message)
+    elif call.data == "heatmap":
+        bot.answer_callback_query(call.id, "Creating a heatmap your image...")
+        heatmap_and_send(call.message)
     elif call.data == "mirror":
         bot.answer_callback_query(call.id, "Выберите горизонтально или вертикально отзеркалить...")
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -238,5 +250,22 @@ def mirror_and_send(message):
     output_stream.seek(0)
     bot.send_photo(message.chat.id, output_stream)
 
+    global type_mirror
+    type_mirror = 1
+
+def heatmap_and_send(message):
+    """ Преобразует изображение в тепловую карту. """
+    photo_id = user_states[message.chat.id]['photo']
+    file_info = bot.get_file(photo_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    image_stream = io.BytesIO(downloaded_file)
+    image = Image.open(image_stream)
+    created_heatmap = convert_to_heatmap(image)
+
+    output_stream = io.BytesIO()
+    created_heatmap.save(output_stream, format="JPEG")
+    output_stream.seek(0)
+    bot.send_photo(message.chat.id, output_stream)
 
 bot.polling(none_stop=True)

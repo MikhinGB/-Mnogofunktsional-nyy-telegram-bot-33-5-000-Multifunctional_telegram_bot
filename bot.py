@@ -7,6 +7,7 @@ import os
 TOKEN = os.environ['TOKEN']
 bot = telebot.TeleBot(TOKEN)
 
+
 user_states = {}  # тут будем хранить информацию о действиях пользователя
 
 ASCII_CHARS = ''
@@ -21,6 +22,16 @@ def resize_image(image, new_width=100):
     new_height = int(new_width * ratio)
     return image.resize((new_width, new_height))
 
+def resize_for_sticker(image, new_width=512):
+    """ Изменяет размер изображения с сохранением пропорций."""
+
+    width, height = image.size
+    # print(f'Размеры изображения исходного: {width, height}')
+    ratio = height / width
+    new_height = int(new_width * ratio)
+    # print(f'Размеры изображения трансформированного: {new_width, new_height}')
+    image_for_sticker = image.resize((new_width, new_height))
+    return image_for_sticker
 
 def invert_colors(image):
     """ Преобразует изображение в инверсионное (эффект негатива) """
@@ -37,6 +48,7 @@ def mirror_image(image):
         im_flipped = image.transpose(method=Image.Transpose.FLIP_TOP_BOTTOM)
     return im_flipped
 
+
 def convert_to_heatmap(image):
     """ Преобразует изображение так, чтобы его цвета отображались в виде тепловой карты,
     от синего (холодные области) до красного (теплые области) """
@@ -45,6 +57,7 @@ def convert_to_heatmap(image):
     image = ImageOps.colorize(image, black='blue', white='red', mid='green')
 
     return image
+
 
 def grayify(image):
     """ Преобразует цветное изображение в оттенки серого. """
@@ -142,8 +155,10 @@ def get_options_keyboard():
     negative_btn = types.InlineKeyboardButton("Negative", callback_data="negative")
     mirror_btn = types.InlineKeyboardButton("Mirror", callback_data="mirror")
     heatmap_btn = types.InlineKeyboardButton("Heatmap", callback_data="heatmap")
-    keyboard.add(pixelate_btn, ascii_btn, negative_btn, mirror_btn, heatmap_btn)
+    resize_btn = types.InlineKeyboardButton("Resize", callback_data="resize")
+    keyboard.add(pixelate_btn, ascii_btn, negative_btn, mirror_btn, heatmap_btn, resize_btn)
     return keyboard
+
 
 def get_mirror_keyboard():
     """ Создает клавиатуру с кнопками для выбора горизонтально или вертикально отзеркалить"""
@@ -171,6 +186,9 @@ def callback_query(call: types.CallbackQuery):
     elif call.data == "heatmap":
         bot.answer_callback_query(call.id, "Creating a heatmap your image...")
         heatmap_and_send(call.message)
+    elif call.data == "resize":
+        bot.answer_callback_query(call.id, "Resizing an your image...")
+        resize_for_sticker_and_send(call.message)
     elif call.data == "mirror":
         bot.answer_callback_query(call.id, "Выберите горизонтально или вертикально отзеркалить...")
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -191,6 +209,7 @@ def callback_query(call: types.CallbackQuery):
                          reply_markup=get_mirror_keyboard())
         type_mirror = 0
         mirror_and_send(call.message)
+
 
 def pixelate_and_send(message):
     """ Пикселизирует изображение и отправляет его обратно пользователю."""
@@ -253,6 +272,7 @@ def mirror_and_send(message):
     global type_mirror
     type_mirror = 1
 
+
 def heatmap_and_send(message):
     """ Преобразует изображение в тепловую карту. """
     photo_id = user_states[message.chat.id]['photo']
@@ -267,5 +287,21 @@ def heatmap_and_send(message):
     created_heatmap.save(output_stream, format="JPEG")
     output_stream.seek(0)
     bot.send_photo(message.chat.id, output_stream)
+
+def resize_for_sticker_and_send(message):
+    """ Преобразует изображение для стикера. """
+    photo_id = user_states[message.chat.id]['photo']
+    file_info = bot.get_file(photo_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    image_stream = io.BytesIO(downloaded_file)
+    image = Image.open(image_stream)
+    created_sticker = resize_for_sticker(image)
+
+    output_stream = io.BytesIO()
+    created_sticker.save(output_stream, format="JPEG")
+    output_stream.seek(0)
+    bot.send_photo(message.chat.id, output_stream)
+
 
 bot.polling(none_stop=True)

@@ -3,9 +3,23 @@ from PIL import Image, ImageOps
 import io
 from telebot import types
 import os
+import random
+
 
 TOKEN = os.environ['TOKEN']
 bot = telebot.TeleBot(TOKEN)
+
+JOKES = ['- Жить, как говорится, хорошо! \n- А хорошо жить ещё лучше! \n- Точно!',
+         'Заполняла резюме. Под конец расплакалась... БЛИИИН... Я такая классная!',
+         '- Мама, я хочу татуировку! \n- Неси ремень, сейчас набьём!!!',
+         'Дружу только с диваном, потому что на него можно положиться.',
+         'Жить надо так, чтобы от твоего настроения была депрессия у других!',
+         'Чему нас научили бегемоты? Что нельзя похудеть, питаясь только травой и салатами!',
+         'Каждый вечер после просмотра новостей я включаю фильм ужасов, чтобы хоть как-то успокоиться!',
+         'Иногда, пока мозг думает, задница успевает принять такое решение, что тараканы в голове аплодируют стоя!',
+         'Сейчас поленюсь еще немного, а потом бездельничать начну.',
+         'Составила большой список дел...  Я только не поняла, кто их делать-то будет....'
+]
 
 
 user_states = {}  # тут будем хранить информацию о действиях пользователя
@@ -22,16 +36,25 @@ def resize_image(image, new_width=100):
     new_height = int(new_width * ratio)
     return image.resize((new_width, new_height))
 
-def resize_for_sticker(image, new_width=512):
-    """ Изменяет размер изображения с сохранением пропорций."""
+def resize_for_sticker(image, new_max_size=512):
+    """ Изменяет, в случае необходимости,  размеры изображения, ограничивая максимальный из них определенной величиной
+    (512 пикселей), сохраняя при этом исходную пропорцию."""
 
     width, height = image.size
     # print(f'Размеры изображения исходного: {width, height}')
-    ratio = height / width
-    new_height = int(new_width * ratio)
-    # print(f'Размеры изображения трансформированного: {new_width, new_height}')
-    image_for_sticker = image.resize((new_width, new_height))
-    return image_for_sticker
+    if width < new_max_size and height < new_max_size:
+        return image
+    else:
+        ratio = height / width
+        if height > width:
+            new_height = new_max_size
+            new_width = int(new_height / ratio)
+        else:
+            new_width = new_max_size
+            new_height = int(new_width * ratio)
+        # print(f'Размеры изображения трансформированного: {new_width, new_height}')
+        image_for_sticker = image.resize((new_width, new_height))
+        return image_for_sticker
 
 def invert_colors(image):
     """ Преобразует изображение в инверсионное (эффект негатива) """
@@ -126,6 +149,17 @@ def send_welcome(message):
     bot.reply_to(message, "Send me an image, and I'll provide options for you!")
 
 
+@bot.message_handler(commands=['joke'])
+def send_random_joke(message):
+    """ Обработчик сообщений, реагирует на команду /joke, отправляя случайным образом выбранную
+    из списка JOKES шутку."""
+
+    lots_jokes = len(JOKES) - 1
+    random_number = random.randint(0, lots_jokes)
+    JOKE = JOKES[random_number]
+    bot.reply_to(message, JOKE)
+
+
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
     """ Обработчик сообщений, реагирует на изображения, отправляемые пользователем. Предлагает
@@ -144,6 +178,9 @@ def save_ascii_chars(message):
     global ASCII_CHARS
     ASCII_CHARS = message.text
     bot.reply_to(message, f'Ваши данные успешно сохранены!')
+
+
+
 
 
 def get_options_keyboard():

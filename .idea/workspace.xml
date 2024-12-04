@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3deaa528-771b-46a4-bc5a-17543035cba0" name="Changes" comment="011224_1">
+    <list default="true" id="3deaa528-771b-46a4-bc5a-17543035cba0" name="Changes" comment="031224_1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
     </list>
@@ -47,7 +47,7 @@
     "settings.editor.selected.configurable": "preferences.general"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.probe">
+  <component name="RunManager" selected="Python.bot">
     <configuration name="bot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="multifunctional_telegram_bot" />
       <option name="ENV_FILES" value="" />
@@ -147,8 +147,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.probe" />
         <item itemvalue="Python.bot" />
+        <item itemvalue="Python.probe" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.probe2" />
       </list>
@@ -210,7 +210,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733063285694</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="031224_1">
+      <option name="closed" value="true" />
+      <created>1733226529241</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1733226529268</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -219,6 +227,7 @@
     <MESSAGE value="261124_1" />
     <MESSAGE value="281124_1" />
     <MESSAGE value="011224_1" />
-    <option name="LAST_COMMIT_MESSAGE" value="011224_1" />
+    <MESSAGE value="031224_1" />
+    <option name="LAST_COMMIT_MESSAGE" value="031224_1" />
   </component>
 </project>

@@ -180,6 +180,18 @@ def send_random_compliment(message):
     COMPLIMENT = COMPLIMENTS[random_number]
     bot.reply_to(message, COMPLIMENT)
 
+@bot.message_handler(commands=['rnd'])
+def toss_a_coin(message):
+    """ Обработчик сообщений, реагирует на команду /rnd, отправляя одно из двух видео с записью процесса подбрасывания
+    монеты. Результат, ОРЕЛ или РЕШКА зависит от сгенерированного числа 1 или 0."""
+
+    rnd = random.randint(0, 1)
+    if rnd == 0:
+        video = open('C:/Users/User/PycharmProjects/Stajirovka/Project3/multifunctional_telegram_bot/111.mp4', 'rb')
+    else:
+        video = open('C:/Users/User/PycharmProjects/Stajirovka/Project3/multifunctional_telegram_bot/222.mp4', 'rb')
+
+    bot.send_video(message.chat.id, video, timeout=10)
 
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
